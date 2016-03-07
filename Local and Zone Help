@@ -1,0 +1,21 @@
+@@ From 2005: Local/Zone help
+
+@@ Syntax: +LHELP -- Displasy help topics within a set zone (@chzone) or local (within a room).
+@@ Snytax: +LEHLP <topic> -- Displays a help topic from either.
+
+@@ Local Help Object
+@create Local Help Object
+@link Local Help Object = #19
+@lock/Basic Local Help Object==#60
+@lset Local Help Object/Basic=no_inherit
+@set Local Help Object = SAFE
+@set Local Help Object = !HALT
+@set Local Help Object = !NO_COMMAND
+&CMD Local Help Object=$+LHELP: @nspemit/silent %#=[bar([mudname()] - Local Help)]%r%r[if(and(t(setr(0,zone(%l))),t(hasattrval(%q0,ZHELP))),Zone:%r [table(get(%q0/ZHELP),17,78)]%r%r)]Local:%r[table(get(%l/LHELP),17,78)]%r%r[bar(Type '+lhelp <subj>' for more)]
+&CMD`LHELP Local Help Object=$+LHELP *: @nspemit/silent %#=[switch([t(hasattr(zone(%l),ZHELP`%0))]:[hasattr(%l,LHELP`%0)],1:?,[bar([name(setr(0,zone(%l)))] - Help)]%r%r[ansi(hw,ucstr(%0))]%r%t[get(%q0/ZHELP`%0)]%r%r[bar()],0:1,[bar([name(%l)] - Help)]%r%r[ansi(hw,ucstr(%0))]%r%t[get(%l/LHELP`%0)]%r%r[bar()],No such help topic.)]
+&CREDITS Local Help Object=Coded by moniker@M*U*S*H.
+@set Local Help Object/CREDITS=no_command visual
+
+THINK Set a bar() function or replace all instances of bar with center in CMD and CMD`LOCAL
+THINK Bar function as follows: &BAR <your function object>=[ansi(h,+)][center(if(%0,[ansi(h,+)]%b%b%0%b%b[ansi(h,+)]),if(%1,%1,76),if(%2,%2,-))][ansi(h,+)]
+THINK Then: @function BAR=<object>,bar
