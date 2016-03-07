@@ -1,0 +1,26 @@
+@@ Global Watch System
+@@ Circa 2005
+@@ Place in Master Room
+
+@@ Watch System
+@create Watch System
+@link Watch System = #2
+@lock/Basic Watch System==me
+@lset Watch System/Basic=no_inherit
+@lock/Use Watch System=!POWER\^GUEST
+@lset Watch System/Use=no_inherit
+@set Watch System = SAFE
+@set Watch System = !HALT
+@set Watch System = !NO_COMMAND
+&ACONNECT Watch System=THINK if(not(hidden(%#)),iter(filter(#LAMBDA/inlist(get(%%0/WATCHES),%#),lwho()),nspemit(##,[ansi(hg,WATCH)]: %n has connected.)))
+@set Watch System/ACONNECT=no_command prefixmatch
+&ADISCONNECT Watch System=THINK if(not(hidden(%#)),iter(filter(#LAMBDA/inlist(get(%%0/WATCHES),%#),lwho()),nspemit(##,[ansi(hg,WATCH)]: %n has disconnected.)))
+@set Watch System/ADISCONNECT=no_command prefixmatch
+&CMD`ADD Watch System=$+WATCH/ADD *: @nspemit/silent %#=[switch([isdbref(setr(0,pmatch(%0)))]:[inlist(get(%#/WATCHES),%q0)],0:?,That is not a player.,?:1,That player is already on your watch list.,1:0,You add [name(%q0)] to your watchlist.[set(%#,WATCHES:[get(%#/WATCHES)] %q0)],Error%, please contact staff.)]
+&CMD`CLEAN Watch System=$+WATCH/CLEAN: @nspemit/silent %#=Watch list clean.[set(%#,WATCHES:[filter(#LAMBDA/hastype(%%0,PLAYER),get(%#/WATCHES))])]
+&CMD`REMOVE Watch System=$+WATCH/REMOVE *: @nspemit/silent %#=[switch([isdbref(setr(0,pmatch(%0)))]:[inlist(get(%#/WATCHES),%q0)],0:?,That is not a player.,?:0,That player is not on your watch list.,1:1,You remove [name(%q0)] from your watchlist.[set(%#,WATCHES:[remove(get(%#/WATCHES),%q0)])],Error%, please contact staff.)]
+&CMD`WHO Watch System=$+WATCH/WHO: @nspemit/silent %#=[center(ansi(hw,Persional who for %n),78)]%r[space(5)]NAME[space(16)]IDLE/CONN[space(3)]FACTION[space(2)]DOING%r[repeat(-,78)]%r[iter(setr(0,setinter(get(%#/watches), objeval(%#,lwho()))),[ufun(#13/DO_FLAGS,##)][ljust([if(hidden(##),ansi(hx,name(##)),name(##))][if(hasattr(##,ALIAS),%([ansi(hx,mid(get(##/ALIAS),0,5))]%))],20)][ljust([first(timestring(idle(##)))]/[first(timestring(conn(##)))],12)][ljust(faction(##),9)][left(if(and(or(orflags(%#,Wr),haspower(%#,SEE_ALL)),hostname(##),doing(##)),32)],,%r)]%r[repeat(-,78)]%r[ansi(hr,Disconnected)]:%b[itemize(sort(iter(setr(1,setdiff(get(%#/watches),objeval(%#,lwho()))),name(##))))]%r[center(Connected: [words(%q0)] - Disconnected: [words(%q1)])]
+&CREDITS Watch System=Coded by moniker@M*U*S*H
+@set Watch System/CREDITS=visual
+&DESCRIBE Watch System=[edit(center(ansi(hw,%b%bCMD attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setr(0,lattr(me/CMD****)),17,78)]%r[edit(center(ansi(hw,%b%bFunction attributes%b%b),78,_),_,ansi(hx,_))]%r[table([setr(1,[lattr(me/FN****)] [lattr(me/FUN****)])],17,78)]%r[edit(center(ansi(hw,%b%bOther attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setdiff(remove(lattr(me),DESCRIBE),%q1 %q0),17,78)]
+@set Watch System/DESCRIBE=no_command visual prefixmatch public nearby
