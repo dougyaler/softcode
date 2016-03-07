@@ -1,0 +1,32 @@
+@@ Circa 2006. First and final release.
+
+@@ Global Places System
+@create Global Places System
+@link Global Places System = me
+@lock/Basic Global Places System==me
+@lset Global Places System/Basic=no_inherit
+@lock/Use Global Places System=TYPE\^PLAYER|FLAG\^PUPPET
+@lset Global Places System/Use=no_inherit
+@set Global Places System = SAFE
+@set Global Places System = HALT
+@set Global Places System = NO_COMMAND
+&CMDS Global Places System=Attribute Tree: $-Commands
+&CMDS`CREATE Global Places System=$CREATE * PLACES: @nspemit/silent %#=[switch([controls(%#,%l)]:[t(setr(1,round(%0,0)))]:[t(gt(%q1,20))],0:?:?,You cannot do that here.,?:0:?,That is not a number.,?:?:1,Isn't that a bit too much?,1:1:0,GAME: %q1 place(s) created. Please see '[ansi(g,+help places-setup)]' for information on how to set up the places.[iter(revwords(lattr(%l/PLACE`***)),wipe(%l/##))][iter(lnum(1,%q1),[set(%l,PLACE`##`MESSAGES:Table|5|sit down at|sits down at|stand up from|stands up from|From the table%,|cannot sit at|tries to sit at the table but fails.)][set(%l,PLACE`##`DESCRIBE:A table)])])]
+&CMDS`PLACES Global Places System=$PLACES: @nspemit/silent %#=[if(hasattr(%l,PLACE`1),[bar()]%r[ufun(DO_PLOOK,%#,%l)]%r[bar()],There are no places here.)]
+&CMDS`PLOOK Global Places System=$PLOOK: @nspemit/silent %#=[if(hasattr(%l,PLACE`1),[bar()]%r[ufun(DO_PLOOK,%#,%l)]%r[bar()],There are no places here.)]
+&CMDS`PLOOK2 Global Places System=$PLOOK *: @nspemit/silent %#=[if(hasattr(%l,PLACE`%0),[ansi(hw,capstr(ufun(FN_MESSAGE,%l,%0,NAME)))]%r[udefault(%l/PLACE`%0`DESCRIBE,No description)],That is not a place.)]
+&CMDS`PUPDATE Global Places System=$PUPDATE */*=*: @nspemit/silent %#=[switch([controls(%#,%l)]:[hasattr(%l,PLACE`%0)]:[t(setr(0,match(NAME|MAX|JOIN|OJOIN|DEPART|ODEPART|PREFIX|FAIL|OFAIL,%1,|)))],0:?:?,You cannot do that here!,?:0:?,No such place!,?:?:0,That is not a valid option.,1:1:1,Place %0's [lcstr(%1)] message changed to: %2.[set(%l,PLACE`%0`MESSAGES:[replace(get(%l/PLACE`%0`MESSAGES),%q0,%2,|)])],Error! Contact [name(owner(me))]!)]
+&CMDS`REMOVE Global Places System=$REMOVE PLACES: @nspemit/silent %#=[if(controls(%#,%l),GAME: Places removed.[null(iter(lnum(1,20),lock(%l/PLACE##,)))][iter(revwords(lattr(%l/PLACE`***)),[wipe(%l/##)])][wipe(%l/PLACE)],You cannot do that there!)]
+&CMDS`SIT Global Places System=$SIT *: @nspemit/silent %#=[switch([t(hasattr(%l,PLACE`%0))]:[ufun(FN_ATPLACE,%#)]:[t(gte(words(get(%l/PLACE`%0)),ufun(FN_MESSAGE,%l,%0,MAX)))]:[t(elock(%l/PLACE%0,%#))],0:?:?:?,That is not a valid place.,?:1:?:?,You are already seated at a place. Try [ansi(g,stand)]ing first.,?:?:1:?,That place is full.,?:?:?:0,You [ufun(FN_MESSAGE,%l,%0,FAIL)] [ufun(FN_MESSAGE,%l,%0,NAME)].[oemit(%l/%#,%n [ufun(FN_MESSAGE,%l,%0,OFAIL)])],1:0:0:1,[ufun(DO_JOIN,%#,%l,%0)])]
+&CMDS`STAND Global Places System=$STAND: @nspemit/silent %#=[if(ufun(FN_ATPLACE,%#),[ufun(DO_DEPART,%#,%l)],You are not seated anywhere.)]
+&CMDS`TT Global Places System=$TT *: @switch ufun(FN_ATPLACE,%#)=0,{@nspemit/silent %#=You're not at a place.},1,{THINK [nspemit([get(%l/PLACE`[get(%#/WHICHPLACE)])],[ufun(FN_MESSAGE,%l,[get(%#/WHICHPLACE)],PREFIX)]%b[ansi(g,%n)][switch(%0,;*,[after(%0,;)],:*,%b[after(%0,:)],%bsays%, "%0")])]}
+&CREDITS Global Places System=Coded by moniker@M*U*S*H.
+@set Global Places System/CREDITS=visual
+&DESCRIBE Global Places System=Global virtual places system. Can be used by players or objects with the PUPPET flag.%r%r[edit(center(ansi(hw,%b%bCMD attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setr(0,lattr(me/CMD****)),17,78)]%r[edit(center(ansi(hw,%b%bFunction attributes%b%b),78,_),_,ansi(hx,_))]%r[table([setr(1,[lattr(me/FN****)] [lattr(me/FUN****)])],17,78)]%r[edit(center(ansi(hw,%b%bOther attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setdiff(remove(lattr(me),DESCRIBE),%q1 %q0),17,78)]
+@set Global Places System/DESCRIBE=no_command visual prefixmatch public nearby
+&DO_DEPART Global Places System=[setq(0,get(%#/WHICHPLACE))]You%b[ufun(FN_MESSAGE,%1,%q0,DEPART)]%b[setr(1,ufun(FN_MESSAGE,%1,%q0,NAME))].[oemit(%1/%#,%n [ufun(FN_MESSAGE,%1,%q0,ODEPART)]%b%q1.)][set(%1,PLACE`%q0:[remove([get(%1/PLACE`%q0)],%#)])][wipe(%#/WHICHPLACE)]
+&DO_JOIN Global Places System=You%b[ufun(FN_MESSAGE,%1,%2,JOIN)]%b[ufun(FN_MESSAGE,%1,%2,NAME)].[oemit(%1/%0,%n%b[ufun(FN_MESSAGE,%1,%2,OJOIN)]%b[ufun(FN_MESSAGE,%1,%2,NAME)].)][set(%1,PLACE`%2:[get(%1/PLACE`%2)] %#)][set(%#,WHICHPLACE:%2)]
+&DO_PLOOK Global Places System=[iter(sort(lattr(%1/PLACE`*)),[ljust(Place #[setr(0,after(##,`))]:,15)][ljust(ufun(FN_MESSAGE,%1,%q0,NAME),25)][sub(ufun(FN_MESSAGE,%1,%q0,MAX),words(get(%1/##)))] empty places.%r[ansi(hw,table(iter(edit(squish(get(%1/##)),%b,|),name(itext(0)),|,|),14,70,|))],,%r)]
+&FN_ATPLACE Global Places System=t(member([iter(lattr([loc(%0)]/PLACE`*),t(member(get([loc(%0)]/##),%0)))],1))
+&FN_MESSAGE Global Places System=elements(get(%0/PLACE`%1`MESSAGES),switch(%2,NAME,1,MAX,2,JOIN,3,OJOIN,4,DEPART,5,ODEPART,6,PREFIX,7,FAIL,8,OFAIL,9),|)
+@set Global Places System/FN_MESSAGE=visual
