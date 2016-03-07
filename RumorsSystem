@@ -21,7 +21,8 @@
 @set Rumors System/CMD`CATEGORYDEL=regexp
 &CMD`DELETE Rumors System=$^\+rumo?(u)?rs/del (.+)/(.+)$: @switch/first [t(hasattr(me,CAT`%2))]:[t(hasattr(me,CAT`%2`%3))]:[or(u(CAN,%#),t(match(get(me/CAT`%2`%3`BY),%#)))]=0:?:?,{@pemit %#=Invalid rumor category: %2},?:0:?,{@pemit %#=Invalid number in [ucstr(%2)] category: %3.},?:?:0,{@pemit %#=Rumor has it that you're unauthorized to do that.},1:1:1,{@pemit %#=Success.},{@pemit %#=If else returned for: #$.}
 @set Rumors System/CMD`DELETE=regexp
-&CMD`READ #4638=$^\+rumo?(u)?rs (.+)$: @switch/first [hasattr(me,CAT`%2)]=1,{@pemit %#=[center(%b%b[capstr(lcstr(%2))] Rumors%b%b,75,=)]%r%r[iter(sort(lattr(me/CAT`%2`)),[ansi(h,setr(1,last(##,`)))]: [u(##)][ufun(DO`READ,CAT`%2`%q1,owner(%#))],,%r)]%r%r[repeat(=,75)]},{@pemit %#=That is not a valid category.}@set Rumors System/CMD`READ=regexp
+&CMD`READ Rumors System=$^\+rumo?(u)?rs (.+)$: @switch/first [hasattr(me,CAT`%2)]=1,{@pemit %#=[center(%b%b[capstr(lcstr(%2))] Rumors%b%b,75,=)]%r%r[iter(sort(lattr(me/CAT`%2`)),[ansi(h,setr(1,last(##,`)))]: [u(##)][ufun(DO`READ,CAT`%2`%q1,owner(%#))],,%r)]%r%r[repeat(=,75)]},{@pemit %#=That is not a valid category.}@set Rumors System/CMD`READ=regexp
+@set Rumors System/CMD`READ=regexp
 &CMD`RUMORS Rumors System=$^\+rumo?(u)?rs$: @pemit %#=[center(%b%bCategories%b%b,75,=)]%r[setq(0,iter(lattr(me/CAT`),capstr(lcstr(after(##,`))),,|))]%r[table(iter(%q0,{## ([nattr(me/CAT`##`)] rumors)},|,|),35,75,|)]%r%r[repeat(=,75)]
 @set Rumors System/CMD`RUMORS=regexp
 &DESCRIBE Rumors System=%r[edit(center(ansi(hw,%b%bCommand attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setr(0,lattr(me/CMD****)),17,78)]%r[edit(center(ansi(hw,%b%bFunction attributes%b%b),78,_),_,ansi(hx,_))]%r[table([setr(1,[lattr(me/FN****)] [lattr(me/FUN****)])],17,78)]%r[edit(center(ansi(hw,%b%bOther attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setdiff(remove(lattr(me/*****),DESCRIBE),%q1 %q0),17,78)]%r%rTotal of: [nattr(me/********)] attributes.
