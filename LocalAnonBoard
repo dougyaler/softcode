@@ -1,0 +1,57 @@
+@@ One of my earlier creations from... I want to guess 2006. A bulletin board that allows for anonymous posting and replies.
+@@ This will be the first and final release.
+
+@@ SYNTAX: show
+@@ Displays a list of topics.
+
+@@ SYNTAX: show <#>
+@@ Shows you post <#>. <#> must be a valid number.
+
+@@ SYNTAX: show <topic#>/<reply#>
+@@ Shows you <reply#> for <topic#>. Both must be valid numbers.
+
+@@ SYNTAX: post [name][#<tripcode>]=<subject>/<body>
+@@ Starts a new topic. [name] and [#tripcode] are optional and can be used togeather, or use just one, OR NONE! If no name or tripcode is given then the poster will be known as whatever the default anonymous name is.
+
+@@ SYNTAX: postreply [<name][#<tripcode>]=<topic#>/<body>
+@@ Adds a reply to <topic#>. <topic#> must be an active topic. Name and tripcode are optional.
+
+@create Anonymous Bulletin Board
+@link Anonymous Bulletin Board = #23
+@lock/Basic Anonymous Bulletin Board==#60
+@lset Anonymous Bulletin Board/Basic=no_inherit
+@set Anonymous Bulletin Board = SAFE
+@set Anonymous Bulletin Board = !HALT
+@set Anonymous Bulletin Board = !NO_COMMAND
+&ADMIN_PASS Anonymous Bulletin Board=4626
+&ANON_NAME Anonymous Bulletin Board=Anonymous
+&BANNED_MSG Anonymous Bulletin Board=NOTICE: You have been banned from using the board. Talk to the owner of the board and maybe you'll get your posting privlages back.
+&BUMP_LIMIT Anonymous Bulletin Board=25
+&CMD_DELETE Anonymous Bulletin Board=$POST/DELETE *: @nspemit/silent %#=[switch([inlist(lattr(v(DB)/POSTS`*),POSTS`%0)]:[t(or(match(objid(%#),after(get(v(DB)/POSTS`%0`CREATOR),|||)),orflags(%#,Wr)))],0:?,That is not a post.,1:0,You cannot delete that post.,Post %0 deleted.[wipe(v(DB)/POSTS`%0***)][set(me,POST_ORD:[remove(get(me/POST_ORD),%0)])])]
+&CMD_POST Anonymous Bulletin Board=$POST *=*/*: @switch inlist(v(BANNED),objid(owner(%#)))=1,{@nspemit/silent %#=u(BANNED_MSG)},0,{@nspemit/silent %#=You add your post to the board. The post is #[setr(0,v(POSTS))].[set(v(DB),POSTS`%q0:%1)][set(v(DB),POSTS`%q0`BODY:%2)][set(v(DB),POSTS`%q0`CREATOR:[ufuN(DO_TRIPCODE,[before(%0,#)],[after(%0,#)])]|||[objid(owner(%#))])][set(v(DB),POSTS`%q0`TIME:[time()])][set(me,POSTS:[inc(%q0)])][set(me,POST_ORD:[before(v(POST_ORD),|)]|%b%q0 [after(v(POST_ORD),|)])]}
+&CMD_REPLY Anonymous Bulletin Board=$POSTREPLY *=*/*: @switch inlist(v(BANNED),objid(owner(%#)))=1,{@nspemit/silent %#=u(BANNED_MSG)},0,{@nspemit/silent %#=[if(hasattrval(v(DB),POSTS`%1),You post a reply to topic %1.[setq(0,add(words(lattr(v(DB)/POSTS`%1`REPLY`*)),1))][set(v(DB),POSTS`%1`REPLY`%q0:[ufun(DO_TRIPCODE,before(%0,#),after(%0,#))]!!![time()]@@@%2|||[objid(%#)])][if(match(before(v(POST_ORD),|),%1),,set(me,POST_ORD:[before(v(POST_ORD),|)]|%b%1 [remove(after(v(POST_ORD),|),%1)]))],That is not a valid post.)]}
+&CMD_SHOW Anonymous Bulletin Board=$SHOW: @nspemit/silent %#=[bar(v(TITLE))]%r#[space(3)]Topic[space(35)]By[space(24)]Replies%r[iter([before(v(POST_ORD),|)] [after(v(POST_ORD),|)],[setq(0,##)][ljust(%q0,4)][ljust(left(get(v(DB)/POSTS`%q0),37),40)][ljust(before(get(v(DB)/POSTS`%q0`CREATOR),|||),26)][words(lattr(v(DB)/POSTS`%q0`REPLY`*))],,%r)]%r[bar()]
+&CMD_SHOW2 Anonymous Bulletin Board=$SHOW *: @select %0=*/*,,{@nspemit/silent %#=[if(hasattrval(v(DB),POSTS`%0),[bar([v(TITLE)])]%rTopic: [get(v(DB)/POSTS`%0)]%rBy: [before(get(v(DB)/POSTS`%0`CREATOR),|||)]%rTime: [get(v(DB)/POSTS`%0`TIME)]%b%b[if(t(gt(sub(secs(),convtime(get(v(DB)/POSTS`%0`TIME))),v(MARK_DEL))),ansi(hr,%(MARKED FOR DELETION! Old.%)))]%r[bar()]%r[get(v(DB)/POSTS`%0`BODY)][if(inlist(v(BANNED),objid(after(u(v(DB)/POSTS`%0`CREATOR),|||))),%r%r[ansi(hr,%(USER WAS BANNED%))])][if(gt(words(lattr(v(DB)/POSTS`%0`REPLY`*)),0),%r%rThere are [words(lattr(v(DB)/POSTS`%0`REPLY`*))] replies to this topic. See '[ansi(g,show <#>/<reply#>)]' to see reply.%r)]%r[bar()],No such post)]}
+&CMD_SHOW3 Anonymous Bulletin Board=$SHOW */*: @nspemit/silent %#=[if(hasattrval(v(DB),POSTS`%0`REPLY`%1),[bar(v(TITLE))]%rTopic: [get(v(DB)/POSTS`%0)]%rBy: [before(get(v(DB)/POSTS`%0`REPLY`%1),!!!)]%rTime: [after(before(get(v(DB)/POSTS`%0`REPLY`%1),@@@),!!!)]%r[bar()]%r[after(before(get(v(DB)/POSTS`%0`REPLY`%1),|||),@@@)]%r[bar()],No such post)]
+&CMD_STICKY Anonymous Bulletin Board=$STICKYTHREAD *: @nspemit/silent %#=[switch([orflags(%#,Wr)]:[hasattr(v(DB),POSTS`[v(0)])]:[match(before(v(POST_ORD),|),v(0))],0:?:?,You cannot do that!,?:0:?,That is not a valid post.,?:?:1,That thread is already sticky.,1:1:0,You make thread #[v(0)] sticky.[set(me,POST_ORD:[squish([before(v(POST_ORD),|)] [v(0)]%b|[remove(rest(v(POST_ORD),|),%0)])])],Error! Contact [name(owner(me))]!)]
+&CMD_WIPE Anonymous Bulletin Board=$WIPEBOARD: @nspemit/silent %#=[if(orflags(%#,Wr),BOARD: All posts on the board have been removed.[wipe(v(DB)/POSTS`****)][set(me,POSTS:0)][set(me,POST_ORD:|)],You cannot do that!)]
+&CREDITS Anonymous Bulletin Board=Coded by Doug B. Yaler (dougyaler@gmail.com)
+@set Anonymous Bulletin Board/CREDITS=visual
+&D_TIME Anonymous Bulletin Board=5184000
+&DB Anonymous Bulletin Board=#40
+&DESCRIBE Anonymous Bulletin Board=[after(u(CMD_SHOW),=)]%r%r[ansi(g,use [name(me)])] for help.
+@set Anonymous Bulletin Board/DESCRIBE=no_command visual prefixmatch public nearby
+&DO_TRIPCODE Anonymous Bulletin Board=[left(if(v(FORCE_ANON),v(ANON_NAME),[switch(%0, ,v(ANON_NAME),stripansi(%0))][if(t(%1),%b[if(strmatch(%1,v(ADMIN_PASS)),ansi(r,## MOD),[ansi(hg,!)][encrypt(%1,v(PASSWORD))])])]),25)]
+&FAILURE Anonymous Bulletin Board=haha nice try
+@set Anonymous Bulletin Board/FAILURE=no_command prefixmatch
+&FORCE_ANON Anonymous Bulletin Board=0
+&IS_OLD Anonymous Bulletin Board=[gte(sub(convtime(time()),convtime(get(v(db)/%0`TIME))),v(D_TIME))]
+&MARK_DEL Anonymous Bulletin Board=4752000
+&PASSWORD Anonymous Bulletin Board=Z4OMNGBn
+@set Anonymous Bulletin Board/PASSWORD=veiled
+&POST_ORD Anonymous Bulletin Board=|
+&POSTS Anonymous Bulletin Board=0
+&TIMEOUT Anonymous Bulletin Board=iter(filter(IS_OLD,lattr(v(DB)/POSTS`*)),[set(me,POST_ORD:[remove(get(me/POST_ORD),after(##,POSTS`))])][wipe(v(DB)/##***)])
+&TITLE Anonymous Bulletin Board=^_^
+&USE Anonymous Bulletin Board=SYNTAX: show%rDisplays a list of topics.%r%rSYNTAX: show <#>%rShows you post <#>. <#> must be a valid number.%r%rSYNTAX: show <topic#>/<reply#>%rShows you <reply#> for <topic#>. Both must be valid numbers.%r%rSYNTAX: post %[name%]%[#<tripcode>%]=<subject>/<body>%rStarts a new topic. %[name%] and %[#tripcode%] are optional and can be used togeather, or use just one, OR NONE! If no name or tripcode is given then the poster will be known as whatever the default anonymous name is.%r%rSYNTAX: postreply %[<name%]%[#<tripcode>%]=<topic#>/<body>%rAdds a reply to <topic#>. <topic#> must be an active topic. Name and tripcode are optional.%r%rFor admin help see http://dougyaler.u2c.info/mush/anonboard.tpd
+@set Anonymous Bulletin Board/USE=no_command prefixmatch
