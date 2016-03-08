@@ -1,0 +1,19 @@
+@@ Circa 2011
+@@ Perhaps my best +who/where command for a MUSH that never opened due to financial constraints on the headwiz's side.
+
+&CMD`WHO Global Commands=$^(\+|)who?(/loc|/con|/idl|/alp)?$: @nspemit/silent %#=[setq(0,switch(after(%2,/),con,conn,idl,idle,alp,name,loc,loc,edefault(%#/WHODEF,conn)))][ansi(hw,+)][center([ansi(hw,+)]%b[ansi(g,[mudname()] - Who's Online)]%b[ansi(hw,+)],74,-)][ansi(hw,+)]%r%b[ansi(hw,Name[space(13)]Alias[space(3)]On For[space(4)]Idle[space(1)]Location)]%r[ufun(FN`WHO,%q0)]%r[ansi(g,There are [ansi(h,[nwho(%#)])] players connected.)][space(18)][ansi(wh,Sorting by:)] [switch(%q0,conn,Connection time,idle,Time idle,name,Name,loc,Location)]%r[ansi(g,Color Legend:)] [ansi(hg,Wizard)] [ansi(c,-)] [ansi(g,Royalty)] [ansi(c,-)] [ansi(hc,Consul)] [ansi(c,-)] [ansi(hb,Idle)] [ansi(c,-)] Normal[if(orflags(%#,Wr),%b[ansi(c,-)] [ansi(hx,Hidden)])]
+@set Global Commands/CMD`WHO=regexp
+&CMD`WHOSET Global Commands=$^(\+|)who/set (loc|con|idl|alp)$: @nspemit/silent %#=You set your default who mode to: [ansi(hw,switch(%2,con,Connection time,idl,Time idle,alp,Name,loc,Location))].[set(%#,WHODEF:[switch(%2,con,conn,idl,idle,alp,name,loc,loc)])]
+@set Global Commands/CMD`WHOSET=regexp
+&FN`NAME Global Commands=ljust(ansi([switch(1,hidden(%0),hx, hasattrval(%0,IDLE),hb,hasflag(%0,WIZARD),hg,hasflag(%0,ROYALTY),g,hasflag(%0,JUDGE),hc,w)],[name(%0)]),%1)
+&FN`WHO Global Commands=[iter(sort(lwho(%#),%0),%b[u(FN`NAME,##,17)][ljust(left(ansi(hw,alias(##)),7),8)][setq(W,if(gte(conn(##),86400),if(gte(conn(##),604800),[div(first(timestring(conn(##)),d),7)]w,[first(timestring(conn(##)),d)]d),%b%b))][ljust(etimefmt(%qW $2H:$2M,conn(##)),10)][ljust(first(timestring(idle(##))),5)][mid([if(findable(%#,##),[if(t(zone(room(##))),[ansi(hg,%[[name(zone(room(##)))]%]%b)])][name(loc(##))],Unfindable)],0,38)],,%r)]%r[ansi(hw,+)][repeat(-,74)][ansi(hw,+)]
+
+@@ Almost certain I removed all "local" stuff.
+@@ +who by itself will return a list of connected players by their connection time.
+@@ Any switch given to +who will affect the sorting.
+@@ /loc for sorting by location; /con by connection; /idl by idle time; /alp for alphabetically.
+@@ +who/set <sort type> will set your default sort type whenever you type just +who.
+
+@@ FN`NAME handles colorization of names based on flags. Wizard and Royals get their own color; this particular MUSH used the Judge flag for a variety of helper. Persons with an Idle attribute are given their own color and hidden admin are given a black color.
+@@ FN`WHO is the actual per-player display- for easier editing.
+@@ As always, please credit this work to moniker@M*U*S*H.
