@@ -1,0 +1,118 @@
+@@ Another MUSH that failed to take off.
+@@ Circa 2013.
+@@ MUSH Combat System based off of the SPECIAL System in the Fallout Series
+@@ All math ideas were done by Amstrad@M*U*S*H.
+
+@@ This assumes your MUSH has a NO_COMBAT flag. Otherwise those set that and unregistered cannot use this system; same for guests.
+@@ SPECIAL System
+@create SPECIAL System
+@link SPECIAL System = #2
+@lock/Use SPECIAL System=CAN/1
+@lset SPECIAL System/Use=no_inherit
+@set SPECIAL System = WIZARD
+@set SPECIAL System = NO_COMMAND
+&CAN SPECIAL System=and(not(orlflags(%#,UNREGISTERED NO_COMBAT)),not(haspower(%#,GUEST)),hasattr(%#,SPECIAL),not(match(zone(room(%#)),#172)))
+&CMD SPECIAL System=
+&CMD`ATTACK SPECIAL System=$+ATTACK *: @switch/first [t(setr(0,locate(%#,%0,PTn)))]:[combat_ok(%q0)]:[combat_ok(%#)]=0:?:?,{@nspemit %#=I can't see %0 here.},?:0:?,{@nspemit %#=[name(%q0)] cannot be attacked due to OOC flag/power settings.},?:2:?,{@nspemit %#=[name(%q0)] isn't registered with the SPECIAL system.},?:3:?,{@nspemit %#=[name(%q0)] has insufficient health!},?:?:3,{@nspemit %#=You have insufficient health!},1:1:1,{@nsremit %l=%n attacks [name(%q0)] with [name(setr(Y,wield(%#)))].%r%n rolls: [setr(A,die([get(%#/SPECIAL`SKILL`[get(%qY/SKILL)])],8,1))] with [setr(C,fold(#248/FN`SUCCESS_COUNT,%qA,0))] successes.%r[name(%q0)] rolls: [setr(B,die(add(get(%q0/SPECIAL`AGILITY),[if(equip(%q0),get([equip(%q0)]/ARMOR),0)]),8,1))] with [setr(D,fold(#248/FN`SUCCESS_COUNT,%qB,0))] successes.%r[switch(%qC,>%qD,{%n wins and deals [setr(Z,if(lt(get(%q0/SPECIAL),get(%qY/DAMAGE)),get(%q0/SPECIAL),get(%qY/DAMAGE)))] damage to [name(%q0)]![attrib_set(%q0/SPECIAL,sub(get(%q0/SPECIAL),%qZ))][switch(combat_ok(%q0),3,{%rThe attack renders [obj(%q0)] unable to fight any longer!})]},<%qD,{[name(%q0)] wins!},%qD,{It's a tie!},{Errors win! Thanks%, Obama!})]},{@nspemit %#=Error![cemit(~~,{#248/CMD`ATTACK: #$ returned in @switch check when executed by %n(%#).},1)]}
+&CMD`ATTACK-DIFF SPECIAL System=$+ATTACK/* *: @switch/first [t(setr(0,locate(%#,%1,PTn)))]:[combat_ok(%q0)]:[combat_ok(%#)]:[t(setr(1,round(%0,0)))]=0:?:?:?,{@nspemit %#=I can't see %0 here.},?:0:?:?,{@nspemit %#=[name(%q0)] cannot be attacked due to OOC flag/power settings.},?:2:?:?,{@nspemit %#=[name(%q0)] isn't registered with the SPECIAL system.},?:3:?:?,{@nspemit %#=[name(%q0)] has insufficient health!},?:?:3:?,{@nspemit %#=You have insufficient health!},?:?:?:0,{@nspemit %#=Cannot attack with difficulty level %0.},?:?:3:?,{@nspemit %#=You have insufficient health!},1:1:1:1,{@nsremit %l=%n attacks [name(%q0)] with [name(setr(Y,wield(%#)))] at %q1 difficulty.%r%n rolls: [setr(A,die([get(%#/SPECIAL`SKILL`[get(%qY/SKILL)])],8,1))] with [setr(C,sub(fold(#248/FN`SUCCESS_COUNT,%qA,0),%q1))] successes.%r[name(%q0)] rolls: [setr(B,die(add(get(%q0/SPECIAL`AGILITY),[if(equip(%q0),get([equip(%q0)]/ARMOR),0)]),8,1))] with [setr(D,fold(#248/FN`SUCCESS_COUNT,%qB,0))] successes.%r[switch(%qC,>%qD,{%n wins and deals [setr(Z,if(lt(get(%q0/SPECIAL),get(%qY/DAMAGE)),get(%q0/SPECIAL),get(%qY/DAMAGE)))] damage to [name(%q0)]![attrib_set(%q0/SPECIAL,sub(get(%q0/SPECIAL),%qZ))][switch(combat_ok(%q0),3,{%rThe attack renders [obj(%q0)] unable to fight any longer!})]},<%qD,{[name(%q0)] wins!},%qD,{It's a tie!},{Errors win! Thanks%, Obama!})]},{@nspemit %#=Error![cemit(~~,{#248/CMD`ATTACK: #$ returned in @switch check when executed by %n(%#).},1)]}
+&CMD`HEAL SPECIAL System=$+HEAL: @switch/first [combat_ok(%#)]:[lte(add(get(%#/SPECIAL`HEAL),86400),secs())]:[t(match(get(%#/SPECIAL),mul(get(%#/SPECIAL`ENDURANCE),2)))]=3:?:?,{@nspemit %#=You have insufficient health!},?:0:?,{@nspemit %#=You need to wait longer before you can heal yourself.},?:?:1,{@nspemit %#=You're already at full health!},1:1:0,{@nsremit %l=[name(%#)] rolls [u(FN`CLEAN,MEDICINE)] for a self-heal...%r[setq(0,div(xget(%#,SPECIAL`SKILL`MEDICINE),2))][setq(1,die(%q0,8,1))]Rolls: %q1 [setq(2,fold(#248/FN`SUCCESS_COUNT,%q1,0))]Successes: %q2%rResult: [u(FN`SUCCESS_LEVEL,%q2)] and [if(gte(%q2,1),{a heal of [setr(Y,if(gte(add(%q0,get(%#/SPECIAL)),setr(W,mul(get(%#/SPECIAL`ENDURANCE),2))),sub(%qW,get(%#/SPECIAL)),%q0))] points.[attrib_set(%#/SPECIAL,[add(get(%#/SPECIAL),%qY)])]},{no heal.})][attrib_set(%#/SPECIAL`HEAL,secs())]},{@nspemit %#=Nope!}
+&CMD`HEAL-PLAYER SPECIAL System=$+HEAL *: @switch/first [t(setr(P,locate(%#,%0,PTn)))]:[combat_ok(%#)]:[combat_ok(%qP)]:[lte(add(get(%qP/SPECIAL`HEAL`%#),86400),secs())]:[t(match(get(%qP/SPECIAL),mul(get(%qP/SPECIAL`ENDURANCE),2)))]=0:?:?:?:?,{@nspemit %#=I can't see %0 here.},?:3:?:?:?,{@nspemit %#=You have insufficient health!},?:?:2:?:?,{@nspemit %#=[name(%qP)] isn't set up with the SPECIAL system.},?:?:0:?:?,{@nspemit %#=[name(%qP)] is unable to be healed.},?:?:?:0:?,{@nspemit %#=You've healed [name(%qP)] not too long ago!},?:?:?:?:1,{@nspemit %#=[name(%qP)] is already at full health!},1:1:1:1:0,{@nsremit %l=[name(%#)] rolls [u(FN`CLEAN,MEDICINE)] to heal [name(%qP)]...%r[setq(0,xget(%#,SPECIAL`SKILL`MEDICINE))][setq(1,die(%q0,8,1))]Rolls: %q1 [setq(2,fold(#248/FN`SUCCESS_COUNT,%q1,0))]Successes: %q2%rResult: [u(FN`SUCCESS_LEVEL,%q2)] and [if(gte(%q2,1),{a heal of [setq(Z,get(%#/SPECIAL`SKILL`MEDICINE))][setr(Y,if(gte(add(%qZ,get(%qP/SPECIAL)),setr(W,mul(get(%qP/SPECIAL`ENDURANCE),2))),sub(%qW,get(%qP/SPECIAL)),%qZ))] points.[attrib_set(%qP/SPECIAL,[add(get(%qP/SPECIAL),%qY)])]},{no heal.})][attrib_set(%qP/SPECIAL`HEAL`%#,secs())]},{@nspemit %#=Thanks, Obama}
+&CMD`ROLL SPECIAL System=$+roll *: @switch/first [t(and(not(hasflag(%#,UNREGISTERED)),hasattr(%#,SPECIAL)))]:[t(setr(A,grab(STRENGTH PERCEPTION ENDURANCE CHARISMA INTELLIGENCE AGILITY LUCK SKILL`GUNS SKILL`ENERGY_WEAPONS SKILL`EXPLOSIVES SKILL`MELEE SKILL`LOCKPICK SKILL`MEDICINE SKILL`REPAIR SKILL`SCIENCE SKILL`SNEAK SKILL`BARTER SKILL`SPEECH SKILL`SURVIVAL,*[edit(%0,%b,_)])))]=0:?,{@nspemit %#=You're unable to do that as of yet.},?:0,{@nspemit %#=That is not a valid type to roll.},1:1,{@nsremit %#=[name(%#)] rolls [u(FN`CLEAN,%qA)]%r[setq(0,xget(%#,SPECIAL`%qA))][setq(1,die(%q0,8,1))]Rolls: %q1 [setq(2,fold(#248/FN`SUCCESS_COUNT,%q1,0))]Successes: %q2 Result: [u(FN`SUCCESS_LEVEL,%q2)]},{@nspemit %#=Error![cemit(~~,{#248/CMD`ROLL: #$ returned when executed by %n(%#).},1)]}
+&CMD`ROLL2 SPECIAL System=$+ROLL/OPPOSED */*: @switch/first [t(setr(0,locate(%#,%1,PTn)))]:[combat_ok(%#)]:[combat_ok(%q0)]:[t(setr(1,grab(STRENGTH PERCEPTION ENDURANCE CHARISMA INTELLIGENCE AGILITY LUCK SKILL`GUNS SKILL`ENERGY_WEAPONS SKILL`EXPLOSIVES SKILL`MELEE SKILL`LOCKPICK SKILL`MEDICINE SKILL`REPAIR SKILL`SCIENCE SKILL`SNEAK SKILL`BARTER SKILL`SPEECH SKILL`SURVIVAL,*[edit(%0,%b,_)])))]=1:1:1:1,{@nsremit %l=%n rolls [u(FN`CLEAN,%q1)] against [name(%q0)]...%r%n rolls: [setr(A,die(get(%#/SPECIAL`%q1),8,1))] with [setr(C,fold(#248/FN`SUCCESS_COUNT,%qA,0))] successes.%r[name(%q0)] rolls: [setr(B,die(get(%q0/SPECIAL`%q1),8,1))] with [setr(D,fold(#248/FN`SUCCESS_COUNT,%qB,0))] successes.%r[switch(%qC,>%qD,{%n wins!},<%qD,{[name(%q0)] wins!},%qD,{It's a tie!},{Errors win! Thanks%, Obama!})]},0:?:?:?,{@nspemit %#=I can't see %1 here.},?:3:?:?,{@nspemit %#=You have insufficient health!},?:?:3:?,{@nspemit %#=[name(%q0)] has insufficient health!},?:?:2:?,{@nspemit %#=It appears as if [name(%q0)] is not set up for the SPECIAL system.},?:2:?:?,{@nspemit %#=You're not properly set up to use the SPECIAL system.},{@nspemit %#=Other general error![cemit(~~,{#248/CMD`ROLL2: #$ in switch check when executed by %n(%#).},1)]}
+&COMMAND_LOCK SPECIAL System=
+&COMMAND_LOCK`FAILURE SPECIAL System=switch(1,hasflag(%#,UNREGISTERED),{You must clear chargen before you can use the SPECIAL system.},hasflag(%#,NO_COMBAT),{You're set NO_COMBAT and cannot use the combat system whatsoever. If you feel this was set in error, please contact the administration.},haspower(%#,GUEST),{Guests cannot do that!},match(zone(room(%#)),#172),{No fighting in the OOC Area, please. No matter what Wizard tells you.},not(hasattr(%#,SPECIAL)),{It would appear that you're not properly set up to use the SPECIAL system.},{You cannot use the SPECIAL system for an unknown reason.})
+&DESCRIBE SPECIAL System=Object containing data, commands and functions for the SPECIAL stats and combat system.
+@set SPECIAL System/DESCRIBE=no_command visual prefixmatch public nearby
+&FN SPECIAL System=
+&FN`CLEAN SPECIAL System=iter(edit(%0,_,%B,SKILL`,),capstr(##))
+&FN`SUCCESS_COUNT SPECIAL System=add(%0,switch(%1,>5,1,0))
+&FN`SUCCESS_LEVEL SPECIAL System=switch(%0,0,Failure,1,Success,2,Good Success,3,Good Success,4,Great Success,5,Great Success,6,Amazing Success,>6,Amazing Success)
+&CREDITS SPECIAL System=Coded by moniker@M*U*S*H.
+@set SPECIAL System/Credits=visual
+
+@@ combat_ok function: switch(1,or(orlflags(%0,UNREGISTERED NO_COMBAT),haspower(%0,GUEST)),{0},not(and(hasattr(%0,SPECIAL`STRENGTH),hasattr(%0,SPECIAL`AGILITY),hasattr(%0,SPECIAL`SKILL`GUNS),hasattr(%0,SPECIAL`SKILL`SURVIVAL))),{2},lt(get(%0/SPECIAL),1),3,{1})
+
+@@ Wielding and Unwielding Weaponry - These COULD just go on the SPECIAL System if you wanted.
+
+&CMD`WIELD Global Commands=$^(\+|)WIELD (.+)$: @switch/first [setr(0,locate(%#,%2,iz))]:[t(hasattrp(%q0,SPECIAL`ISWEAP))]:[t(elock(%q0/WIELD,%#))]:[t(hasattr(%q0,WIELDED))]=#-1*,{@nspemit %#=I can't see that here.},#-2*,{@nspemit %#=I can't tell which '%2' you mean!},*:0:?:?,{@nspemit %#=You cannot wield that!},*:?:0:?,{@nspemit %#=[udefault(%q0/FAILURE,You cannot wield that!)]},*:?:?:1,{@nspemit %#=That item is already wielded by someone else!},*:1:1:0,{@verb %q0=%#,WIELD,WIELD,OWIELD,,AWIELD;THINK [attrib_set(%#/SPECIAL`WIELD,%q0)][attrib_set(%q0/WIELDED,%#)]},{@nspemit %#=An error has occurred.[cemit(~~,{%!/CMD`WIELD: #$ returned in @switch when executed by %n(%#).},1)]}
+&CMD`UNWIELD Global Commands=$^(\+|)UNWIELD$: @switch/first [t(setr(0,get(%#/SPECIAL`WIELD)))]=0,{@nspemit %#=It appears that you're not even wielding anything!},1,{@verb %q0=%#,UNWIELD,UNWIELD,OUNWIELD,,AUNWIELD;THINK [attrib_set(%#/SPECIAL`WIELD)][attrib_set(%q0/WIELDED)]},{@nspemit %#=An error has occurred.[cemit(~~,{%1/CMD`UNWIELD: #$ returned in @switch when executed by %n(%#).},1)]}
+
+@@ Same but for equipment - Again, can just go on the SPECIAL System
+
+&CMD`EQUIP Global Commands=$^(\+|)EQUIP (.+)$: @switch/first [setr(0,locate(%#,%2,iz))]:[t(hasattrp(%q0,SPECIAL`ISEQUIP))]:[t(elock(%q0/EQUIP,%#))]:[t(hasattrp(%q0,EQUIPPED))]=#-1*,{@nspemit %#=I can't see that here.},#-2*,{@nspemit %#=I can't tell which '%2' you mean!},*:0:?:?,{@nspemit %#=You cannot equip that!},*:?:0:?,{@nspemit %#=[udefault(%q0/FAILURE,You cannot equip that!)]},*:?:?:1,{@nspemit %#=That item is already equipped by someone else!},*:1:1:0,{@verb %q0=%#,EQUIP,EQUIP,OEQUIP,,AEQUIP;THINK [attrib_set(%#/SPECIAL`EQUIP,%q0)][attrib_set(%q0/EQUIPPED,%#)]},{@nspemit %#=An error has occurred.[cemit(~~,{%!/CMD`EQUIP: #$ returned in @switch when executed by %n(%#).},1)]}
+&CMD`UNEQUIP Global Commands=$^(\+|)UNEQUIP$: @switch/first [t(setr(0,get(%#/SPECIAL`EQUIP)))]=0,{@nspemit %#=It appears that you're not even wearing anything!},1,{@verb %q0=%#,UNEQUIP,UNEQUIP,OUNEQUIP,,AUNEQUIP;THINK [attrib_set(%#/SPECIAL`EQUIP)][attrib_set(%q0/EQUIPPED)]},{@nspemit %#=An error has occurred.[cemit(~~,{#99/CMD`UNEQUIP: #$ returned in @switch when executed by %n(%#).},1)]}
+
+@@ Karma System - Can go on SPECIAL System
+
+&CMD`KARMA Global Commands=$+KARMA: @nspemit %#=You presently have [default(%#/KARMA,0)] Karma for yourself and [default(%#/KARMA`DIST,0)] to give to others.%r
+&CMD`KARMA`GIVE Global Commands=$+KARMA *: @switch/first [t(setr(0,pmatch(%0)))]:[t(member(v(NON_PLAYERS),%q0))]:[eq(get(%#/KARMA`DIST),0)]:[match(%#,%q0)]=0:?:?:?,{@nspemit %#=Not a valid player: %0},?:1:?:?,{@nspemit %#=Sorry, but [name(%q0)] is not an actual IC entity.},?:?:1:?,{@nspemit %#=You've used up all your Karma for the week!},?:?:?:1,{@nspemit %#=You can't award yourself Karma!},1:0:0:0,{@nspemit %#=You award [name(%q0)] Karma.[nspemit(%q0,%n has awarded you Karma!)][attrib_set(%q0/KARMA,[inc(get(%q0/KARMA))])][attrib_set(%#/KARMA`DIST,[dec(get(%#/KARMA`DIST))])][cemit(~~,[name(%#)]%(%#%) just awarded Karma to [name(%q0)]%(%q0%),1)]},{@nspemit #$ @ [secs()] by %: -- PLEASE NOTIFY THE CODE WIZARD![cemit(~~,{%!/CMD`KARMA`GIVE: Error with %# awarding %q0 Karma at [secs()] with #$ switched. (%c)},1)]}
+
+@@ Sheet and Skill Glance/Upgrade. Need the bar function below, otherwise just center and repeat.
+@@ Also going to need the Karma function below 
+
+&CMD`SHEET Global Commands=$+SHEET: @nspemit %#=[bar(+sheet for %n)]%r[ansi(g,Name)]: [if(hasattr(%#,FULLNAME),get(%#/FULLNAME),name(%#))] [ansi(g,Race)]: [default(%#/RACE,Undefined)] [ansi(g,Sex)]: [default(%#/SEX,Undefined)] [ansi(g,Age)]: [default(%#/AGE,Undefined)]%r[ansi(g,Faction)]: [if(setr(F,faction(NAME,setr(0,get(%#/FACTION)))),%qF,None)]%r[ansi(g,Rank)]: [if(setr(R,faction(RANKN,%q0,%#)),%qR,None)]%r[space(47)][ansi(g,Experience)]: [default(%#/SPECIAL`XP,0)]%r[ansi(g,Attributes)]:[space(36)][ansi(g,Skills)]:%r[ufun(FN`SRANK,%#,Strength)][ufun(FN`SSKILL,%#,Guns)]%r[ufun(FN`SRANK,%#,Perception)][ufun(FN`SSKILL,%#,Energy Weapons)]%r[ufun(FN`SRANK,%#,Endurance)][ufun(FN`SSKILL,%#,Explosives)]%r[ufun(FN`SRANK,%#,Charisma)][ufun(FN`SSKILL,%#,Melee)]%r[ufun(FN`SRANK,%#,Intelligence)][ufun(FN`SSKILL,%#,Lockpick)]%r[ufun(FN`SRANK,%#,Agility)][ufun(FN`SSKILL,%#,Medicine)]%r[ufun(FN`SRANK,%#,Luck)][ufun(FN`SSKILL,%#,Repair)]%r[space(47)][ufun(FN`SSKILL,%#,Science)]%r[ansi(g,Karma)]: [ljust(if(get(%#/KARMA),get(%#/KARMA),0),6)][ljust(karma(%#),34)][ufun(FN`SSKILL,%#,Sneak)]%r[space(47)][ufun(FN`SSKILL,%#,Barter)]%r[ansi(g,Weapon)]: [ljust([name(setr(Z,wield(%#)))] %([get(%qZ/SKILL)]/[get(%qZ/DAMAGE)]%),39)][ufun(FN`SSKILL,%#,Speech)]%r[ansi(g,Armor)]: [ljust(if(t(equip(%#)),[name(setr(Y,equip(%#)))] %([get(%qY/ARMOR)]%),Nothing),40)][ufun(FN`SSKILL,%#,Survival)]%r[bar(switch(combat_ok(%#),1,Health: [get(%#/SPECIAL)]/[mul(get(%#/SPECIAL`ENDURANCE),2)]))]
+&CMD`SKILL Global Commands=$+SKILL: @nspemit %#=[bar(Skill Glance for %n,50)]%r[table(iter(Barter Energy_Weapons Explosives Guns Lockpick Medicine Melee Repair Science Sneak Speech Survival,[ljust(##:,19)][rjust(get(%#/SPECIAL`SKILL`##),3)],,|),25,60,|)]%rSkills tagged: [itemize(get(%#/SPECIAL`SKILL`TAGGED),|)]%r[bar(Available XP: [get(%#/SPECIAL`XP)],50)]
+&CMD`SKILL`UPGRADE Global Commands=$+SKILL *: @switch/first [t(setr(0,grab(BARTER ENERGY_WEAPONS EXPLOSIVES GUNS LOCKPICK MEDICINE MELEE REPAIR SCIENCE SNEAK SPEECH SURVIVAL,edit(%0,%b,_))))]:[setq(1,inc(get(%#/SPECIAL`SKILL`%q0)))][gte(get(%#/SPECIAL`XP),[setr(2,if(t(match(get(%#/SPECIAL`SKILL`TAGGED),%q0,|)),div(%q1,2),%q1))])]=1:1,{@nspemit %#=You upgrade your %q0 skill for %q2 XP. You now have a total of [setr(3,sub(get(%#/SPECIAL`XP),%q2))] XP.[attrib_set(%#/SPECIAL`SKILL`%q0,%q1)][attrib_set(%#/SPECIAL`XP,%q3)]},0:?,{@nspemit %#=Invalid skill: %0},?:0,{@nspemit %#=It will cost you %q2 XP to upgrade that skill%, you only have [get(%#/SPECIAL`XP)] XP.},{@nspemit %#=Error![cemit(~~,{%!/CMD`SKILL`UPGRADE: #$ returned in @switch when executed by %n.},1)]}
+
+&FN`SSKILL Global Commands=[ljust(%1,20)][default(%0/SPECIAL`SKILL`[edit(%1,%b,_)],0)]
+&FN`SRANK Global Commands=[ljust(%1,16)][ljust(setr(1,default(%0/SPECIAL`%1,0)),4)][ljust(switch(%q1,1,Terrible,2,Bad,3,Poor,4,Fair,5,Average,6,Good,7,Very Good,8,Great,9,Exceptional,10,Heroic,%q1),27)]
+
+@@ Equipment Parent
+@create Equipment Parent
+@link Equipment Parent = me
+@lock/Drop Equipment Parent=CAN/1
+@lset Equipment Parent/Drop=wizard
+@lset Equipment Parent/Drop=!no_inherit
+@lock/Give Equipment Parent=CAN/1
+@lset Equipment Parent/Give=wizard
+@lset Equipment Parent/Give=!no_inherit
+@set Equipment Parent = NO_COMMAND
+&CAN Equipment Parent=not(hasattr(me,EQUIPPED))
+&DESCRIBE Equipment Parent=You see nothing special with this equipment.
+@set Equipment Parent/DESCRIBE=no_command visual prefixmatch public nearby
+&DROP_LOCK Equipment Parent=
+&DROP_LOCK`FAILURE Equipment Parent=You can't get rid of equipped items!
+&EQUIP Equipment Parent=You equip [name(me)].
+&GIVE_LOCK Equipment Parent=
+&GIVE_LOCK`FAILURE Equipment Parent=You can't get rid of equipped items!
+&OEQUIP Equipment Parent=equips [name(me)].
+&OUNEQUIP Equipment Parent=unequips [name(me)].
+&SPECIAL Equipment Parent=
+@set Equipment Parent/SPECIAL=no_command wizard
+&SPECIAL`ISEQUIP Equipment Parent=1
+&UNEQUIP Equipment Parent=You unequip [name(me)].
+
+@@ Weapon Parent
+@create Weapon Parent
+@link Weapon Parent = me
+@lock/Drop Weapon Parent=CAN/1
+@lset Weapon Parent/Drop=wizard
+@lset Weapon Parent/Drop=!no_inherit
+@lock/Give Weapon Parent=CAN/1
+@lset Weapon Parent/Give=wizard
+@lset Weapon Parent/Give=!no_inherit
+@set Weapon Parent = NO_COMMAND
+&CAN Weapon Parent=not(hasattr(me,WIELDED))
+&DESCRIBE Weapon Parent=You see nothing special with this weapon.
+@set Weapon Parent/DESCRIBE=no_command visual prefixmatch public nearby
+&DROP_LOCK Weapon Parent=
+&DROP_LOCK`FAILURE Weapon Parent=You can't get rid of wielded items!
+&GIVE_LOCK Weapon Parent=
+&GIVE_LOCK`FAILURE Weapon Parent=You can't get rid of wielded items!
+&OUNWIELD Weapon Parent=unwields [name(me)].
+&OWIELD Weapon Parent=wields [name(me)].
+&SPECIAL Weapon Parent=
+@set Weapon Parent/SPECIAL=no_command wizard
+&SPECIAL`ISWEAP Weapon Parent=1
+&UNWIELD Weapon Parent=You unwield [name(me)].
+&WIELD Weapon Parent=You wield [name(me)].
+
+@@ I haven't tested this code out in years, but it should still work. As far as I am aware, everything can go in one object- don't know why I didn't do that in the first place, but whatever.
+@@ Might want the bar function for +sheet and skill: [ansi(h[setr(g,if(%2,%2,c))],<<)][center(if(%0,[ansi(h%qg,>>)]%b%b%0%b%b[ansi(h%qg,<<)]),if(%1,%1,74),ansi(%qg,setr(k,if(%3,%3,-))),ansi(%qg,%qk))][ansi(h%qg,>>)]
+@@ Karma function: switch(setr(0,locate(%#,%0,Pym)),#-1*,No Match,#-2*,Ambigious Name: %0,elements([u(FN`KARMA`[default(%q0/ALIGNMENT,NEUTRAL)])],switch(get(%q0/KARMA),=<300,30,>291,29,>281,28,>271,27,>261,26,>251,25,>241,24,>231,23,>221,22,>211,21,>201,20,>191,19,>181,18,>171,17,>161,16,>151,15,>141,14,>131,13,>121,12,>111,11,>101,10,>91,9,>81,8,>71,7,>61,6,>51,5,>41,4,>31,3,>21,2,>11,1,1),|))
+@@ KARMA`BAD: Outlaw|Opportunist|Plunderer|Fat Cat|Marauder|Pirate of the Wastes|Betrayer|Desert Terror|Ne'er-do-well|Cascades Crime lord|Defiler|Mountain Boogeyman|Sword of Despair|Cascades Boogeyman|Villain of the Wastes|Fiend|Wasteland Destroyer|Evil Incarnate|Scourge of the Wastes|Architect of Doom|Bringer of Sorrow|Deceiver|Consort of Discord|Stuff of Nightmares|Agent of Chaos|Instrument of Ruin|Soultaker|Demon's Spawn|Devil
+@@ KARMA`GOOD: Samaritan|Martyr|Sentinel|Defender|Dignitary|Peacekeeper|Ranger of the Wastes|Protector|Desert Avenger|Exemplar|Cascades Crusader|Paladin|Mountain Legend|Shield of Hope|Cascades Legend|Hero of the Wastes|Paragon|Wasteland Survivor|Saint|Guardian of the Wastes|Restorer of Faith|Model of Selflessness|Shepherd|Friend of the People|Champion of Justice|Symbol of Order|Herald of Tranquility|Last, Best Hope of Humanity|Savior of the Damned|Messiah
+@@ KARMA`NEUTRAL: Drifter|Renegade|Seeker|Wanderer|Citizen|Adventurer|Vagabond of the Wastes|Mercenary|Desert Scavenger|Observer|Cascades Councilor|Keeper|Mountain Myth|Pinnacle of Survival|Cascades Myth|Strider of the Wastes|Beholder|Wasteland Watcher|Super-Human|Renegade of the Wastes|Soldier of Fortune|Profiteer|Egocentric|Loner|Hero for Hire|Model of Apathy|Person of Refinement|Moneygrubber|Gray Stranger|True Mortal 
+
+@@ Ensure that the SPECIAL attribute is set wizard and mortal_dark.
+@@ Same for the KARMA attribute, though we had that visual instead of mdark.
