@@ -45,7 +45,7 @@
 &DESCRIBE Rumors System=%r[edit(center(ansi(hw,%b%bCommand attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setr(0,lattr(me/CMD****)),17,78)]%r[edit(center(ansi(hw,%b%bFunction attributes%b%b),78,_),_,ansi(hx,_))]%r[table([setr(1,[lattr(me/FN****)] [lattr(me/FUN****)])],17,78)]%r[edit(center(ansi(hw,%b%bOther attributes%b%b),78,_),_,ansi(hx,_))]%r[table(setdiff(remove(lattr(me/*****),DESCRIBE),%q1 %q0),17,78)]%r%rTotal of: [nattr(me/********)] attributes.
 @set Rumors System/DESCRIBE=no_command visual prefixmatch public nearby
 &DO Rumors System=Attribute Tree: Execute Functions
-&DO`ADD Rumors System=[setq(1,escape(%1))][setq(2,inc(v(CAT`%0)))][attrib_set(me/CAT`%0`%q2,%q1)][attrib_set(me/CAT`%0`%q2`BY,%#)]
+&DO`ADD Rumors System=[setq(1,escape(%1))][setq(2,inc(v(CAT`%0)))][attrib_set(me/CAT`%0`%q2,%q1)][attrib_set(me/CAT`%0`%q2`BY,%#)][attrib_set(me/CAT`%0,%q2)]
 &DO`DEGRADE Rumors System=[setq(1,pickrand(ldelete(lnum(1,words(setr(0,v(%0)))),matchall(%q0,...))))] [if(match(elements(%q0,%q1),"*"),setq(2,M),setq(2,switch(elements(%q0,%q1),"*,B,*",A,N)))] [attrib_set(me/%0,replace(%q0,%q1,[switch(%q2,M,",B,")]...[switch(%q2,M,",A,")]))]
 &DO`DIS Rumors System=[center(%b%b[capstr(lcstr(%0))] Rumors%b%b,75,=)]%r%r[iter(lattr(me/CAT`%0`),[last(##,`)]: [u(##)],,%r)]%r%r[repeat(=,75)]
 &DO`PURGE Rumors System=[wipe(me/%0)]
